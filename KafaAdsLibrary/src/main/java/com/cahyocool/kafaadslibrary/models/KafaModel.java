@@ -1,4 +1,4 @@
-package com.kafaads.kafaadslibrary;
+package com.cahyocool.kafaadslibrary.models;
 
 public class KafaModel {
     String _status;

@@ -26,13 +26,15 @@ android {
 }
 
 dependencies {
-
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    implementation 'androidx.work:work-runtime:2.7.1'
+    implementation 'com.android.support:multidex:1.0.3'
     //ads
+    implementation 'com.facebook.android:audience-network-sdk:5.10.1'
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
     implementation 'com.google.android.gms:play-services-ads:19.7.0'
     // Admob AppOpen Ads
@@ -40,4 +42,12 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+    implementation 'com.google.code.gson:gson:2.8.5'
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.13.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.1'
 }

@@ -1,8 +1,8 @@
-package com.kafaads.wafer;
+package com.cahyocool.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
+import com.cahyocool.myapplication.R;
 
 public class MainActivity extends AppCompatActivity {
 
