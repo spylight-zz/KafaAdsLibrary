@@ -105,8 +105,9 @@ ads.load();
 
 
 ## Authors
+Made with ❤ by [@spylight-zz](https://www.github.com/spylight-zz)
 
-- [@spylight-zz](https://www.github.com/spylight-zz)
+[Buy me a coffee](https://www.buymeacoffee.com/spylight)
 
 
 
