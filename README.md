@@ -1,4 +1,6 @@
-# BatchMumuConnectToAS
-This batch file for connect MUMU Player to Android Studio
+# KafaAds Library Admob for Android
+This library help to display ads from Admob, you can use it for simple display Ads
 
-![batch example](https://github.com/spylight-zz/BatchMumuConnectToAS/blob/main/launch_jpg.jpg)
+
+
+
