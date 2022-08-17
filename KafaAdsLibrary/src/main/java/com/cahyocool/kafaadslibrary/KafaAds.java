@@ -17,6 +17,7 @@ import com.cahyocool.kafaadslibrary.data.Ad;
 import com.cahyocool.kafaadslibrary.data.AdDataRepository;
 import com.cahyocool.kafaadslibrary.data.AdDataSource;
 import com.cahyocool.kafaadslibrary.data.AdType;
+import com.cahyocool.kafaadslibrary.models.KafaAppSetting;
 import com.cahyocool.kafaadslibrary.models.KafaModel;
 import com.cahyocool.kafaadslibrary.third.BaseInterstitialThirdParty;
 import com.cahyocool.kafaadslibrary.third.BaseRewardThirdParty;
@@ -72,6 +73,7 @@ public class KafaAds implements OnAdLoadListener {
     public static final String TAG = "KafaAdsLibraryTest";
     public static Boolean TEST = false;
     private static KafaModel kafaModel;
+    private static KafaAppSetting kafaAppSetting;
 
     public static void setAds(KafaModel kafaModel) {
         KafaAds.kafaModel = kafaModel;
@@ -79,6 +81,14 @@ public class KafaAds implements OnAdLoadListener {
 
     public static KafaModel getAds() {
         return kafaModel;
+    }
+
+    public static void setSetting(KafaAppSetting kafaAppSetting) {
+        KafaAds.kafaAppSetting = kafaAppSetting;
+    }
+
+    public static KafaAppSetting getSetting() {
+        return kafaAppSetting;
     }
 
     public static Activity getActivity(Context context) {
@@ -542,5 +552,24 @@ public class KafaAds implements OnAdLoadListener {
                 }
             });
         }
+    }
+
+    public static String getServer() {
+        String base_url;
+        switch (KafaAds.getSetting().get_baseServer()) {
+            case "ONEDRIVE":
+                base_url = "https://onedrive.live.com/download?cid=";
+                break;
+            case "DROPBOX":
+                base_url = "https://dl.dropboxusercontent.com/s/";
+                break;
+            case "GDRIVE":
+                base_url = "https://drive.google.com/uc?export=download&id=";
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + KafaAds.getSetting().get_baseServer());
+        }
+
+        return base_url;
     }
 }
