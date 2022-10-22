@@ -8,29 +8,49 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.applovin.mediation.MaxError;
+import com.applovin.sdk.AppLovinSdk;
+import com.applovin.sdk.AppLovinSdkConfiguration;
 import com.cahyocool.kafaadslibrary.data.Ad;
 import com.cahyocool.kafaadslibrary.data.AdDataRepository;
 import com.cahyocool.kafaadslibrary.data.AdDataSource;
+import com.cahyocool.kafaadslibrary.data.AdName;
 import com.cahyocool.kafaadslibrary.data.AdType;
 import com.cahyocool.kafaadslibrary.models.KafaAppSetting;
 import com.cahyocool.kafaadslibrary.models.KafaModel;
+import com.cahyocool.kafaadslibrary.third.BaseAppLovinInterstitial;
+import com.cahyocool.kafaadslibrary.third.BaseAppLovinReward;
 import com.cahyocool.kafaadslibrary.third.BaseInterstitialThirdParty;
 import com.cahyocool.kafaadslibrary.third.BaseRewardThirdParty;
 import com.cahyocool.kafaadslibrary.third.OnAdLoadListener;
+import com.cahyocool.kafaadslibrary.third.OnAppLovinAdListener;
 import com.cahyocool.kafaadslibrary.third.admob.AdMobBanner;
 import com.cahyocool.kafaadslibrary.third.admob.AdMobInterstitial;
-import com.cahyocool.kafaadslibrary.third.admob.AdMobNative;
 import com.cahyocool.kafaadslibrary.third.admob.AdMobReward;
 import com.cahyocool.kafaadslibrary.third.admob.AppOpenManager;
+import com.cahyocool.kafaadslibrary.third.admob.TemplateView;
+import com.cahyocool.kafaadslibrary.third.applovin.MaxAppOpen;
+import com.cahyocool.kafaadslibrary.third.applovin.MaxBanner;
+import com.cahyocool.kafaadslibrary.third.applovin.MaxInterstitial;
+import com.cahyocool.kafaadslibrary.third.applovin.MaxRewards;
 import com.cahyocool.kafaadslibrary.third.facebook.FacebookBanner;
 import com.cahyocool.kafaadslibrary.third.facebook.FacebookInterstitial;
 import com.cahyocool.kafaadslibrary.third.facebook.FacebookNative;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdLoader;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.formats.NativeAdOptions;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.nativead.NativeAd;
 import com.kafaads.kafaadslibrary.BuildConfig;
 
 import java.lang.ref.WeakReference;
@@ -40,28 +60,36 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class KafaAds implements OnAdLoadListener {
+public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
     private Context context;
+    public static Activity activity;
     private final AdDataRepository adDataRepository;
     private FrameLayout container;
     private Timer mTimer;
     private int interstitialCount;
     private OnInterstitialAdLoadListener onInterstitialAdLoadListener;
     private OnRewardAdLoadListener onRewardAdLoadListener;
+    private OnMaxInterstitialAdLoadListener onMaxInterstitialAdLoadListener;
+    private OnMaxRewardAdLoadListener onMaxRewardAdLoadListener;
     private LoadTimerTask mTimerTask;
-    private AdMobNative adMobNative;
     private AdMobBanner adMobBanner;
     private AdMobInterstitial adMobInterstitial;
     private AdMobReward adMobReward;
     private FacebookBanner facebookBanner;
     private FacebookNative facebookNative;
     private FacebookInterstitial facebookInterstitial;
+    private MaxBanner maxBanner;
+    private MaxRewards maxRewards;
+    private MaxInterstitial maxInterstitial;
     private LoadHandler mHandler;
     private Runnable mRunnable;
     private BaseInterstitialThirdParty currentBaseInterstitialThirdParty;
     private BaseRewardThirdParty currentBaseRewardThirdParty;
+    private BaseAppLovinInterstitial currentAppLovinInterstitial;
+    private BaseAppLovinReward currentBaseAppLovinReward;
     private static final int FACEBOOK = 2;
     private static final int ADMOB = 3;
+    private static final int APPLOVIN = 4;
     private static final int HOUSE = 13;
     private static final int BANNER = 101;
     private static final int HALF_BANNER = 103;
@@ -105,24 +133,71 @@ public class KafaAds implements OnAdLoadListener {
         return null;
     }
 
-    public static void initAd(Context context, String appId) {
-        MobileAds.initialize(KafaAds.getActivity(context), appId);
+    public static void initAd(Activity activity) {
+        KafaAds.activity = activity;
+        if (KafaAds.getAds().get_backup_status().equalsIgnoreCase("1")) {
+            switch (KafaAds.getAds().get_backup_ads()) {
+                case "Applovin":
+                    AppLovinSdk.getInstance(activity).setMediationProvider("max");
+                    AppLovinSdk.initializeSdk(activity, new AppLovinSdk.SdkInitializationListener() {
+                        @Override
+                        public void onSdkInitialized(final AppLovinSdkConfiguration configuration) {
+                        }
+                    });
+                    break;
+                case "FBAds":
+                    break;
+            }
+        } else {
+            MobileAds.initialize(activity, new OnInitializationCompleteListener() {
+                @Override
+                public void onInitializationComplete(InitializationStatus initializationStatus) {
+                }
+            });
+        }
+
     }
 
-    public static void initOpenAd(Application app) {
-        AppOpenManager appOpenManager = new AppOpenManager(app);
-        Log.d(TAG, "load init openads");
+    public static String adsVersion(AdName adName) {
+        String res = null;
+        switch (adName) {
+            case ADMOB:
+                res = String.valueOf(MobileAds.getVersion());
+                break;
+        }
+
+        return res;
     }
 
-    private KafaAds(Builder builder) {
-        context = builder.context;
-        adDataRepository = builder.adDataRepository;
-        container = builder.container;
+    public static void initOpenAd(Application app, String statAds, String Ads, String AppOpenId) {
+        if (statAds.equalsIgnoreCase("1")) {
+            switch (Ads) {
+                case "Applovin":
+                    AppLovinSdk.initializeSdk(app.getApplicationContext(), new AppLovinSdk.SdkInitializationListener() {
+                        @Override
+                        public void onSdkInitialized(final AppLovinSdkConfiguration configuration) {
+                            MaxAppOpen maxAppOpen = new MaxAppOpen(app.getApplicationContext(), AppOpenId);
+                        }
+                    });
+                    break;
+            }
+        } else {
+            AppOpenManager appOpenManager = new AppOpenManager(app);
+        }
+
+    }
+
+    private KafaAds(With with) {
+        context = with.context;
+        adDataRepository = with.adDataRepository;
+        container = with.container;
         mTimer = new Timer();
-        interstitialCount = builder.interstitialCount;
-        onInterstitialAdLoadListener = builder.onInterstitialAdLoadListener;
-        onRewardAdLoadListener = builder.onRewardAdLoadListener;
-        TEST = builder.test_option;
+        interstitialCount = with.interstitialCount;
+        onInterstitialAdLoadListener = with.onInterstitialAdLoadListener;
+        onRewardAdLoadListener = with.onRewardAdLoadListener;
+        onMaxInterstitialAdLoadListener = with.onMaxInterstitialAdLoadListener;
+        onMaxRewardAdLoadListener = with.onMaxRewardAdLoadListener;
+        TEST = with.test_option;
 
         adDataRepository.getAll(new AdDataSource.OnGetAllSuccessListener() {
             @Override
@@ -156,9 +231,28 @@ public class KafaAds implements OnAdLoadListener {
     }
 
     @Override
+    public void onAdExpanded(Ad ad) {
+
+    }
+
+    @Override
+    public void onAdCollapsed(Ad ad) {
+
+    }
+
+    @Override
     public void onAdLoaded(@NonNull Ad ad,
                            @Nullable Object data) {
         switch (ad.name.getCode() * ad.type.getCode()) {
+            case ADMOB * BANNER:
+            case ADMOB * HALF_BANNER: {
+                com.google.android.gms.ads.AdView adView =
+                        (com.google.android.gms.ads.AdView) data;
+
+                container.removeAllViews();
+                container.addView(adView);
+                break;
+            }
             case ADMOB * INTERSTITIAL:
                 currentBaseInterstitialThirdParty = adMobInterstitial;
 
@@ -173,6 +267,29 @@ public class KafaAds implements OnAdLoadListener {
                     onRewardAdLoadListener.onAdLoaded();
                 }
                 break;
+            case APPLOVIN * BANNER:
+            case APPLOVIN * HALF_BANNER: {
+                com.applovin.adview.AppLovinAdView adView =
+                        (com.applovin.adview.AppLovinAdView) data;
+
+                container.removeAllViews();
+                container.addView(adView);
+                break;
+            }
+            case APPLOVIN * INTERSTITIAL:
+                currentAppLovinInterstitial = maxInterstitial;
+
+                if (onMaxInterstitialAdLoadListener != null) {
+                    onMaxInterstitialAdLoadListener.onAdLoaded();
+                }
+                break;
+            case APPLOVIN * REWARD:
+                currentBaseAppLovinReward = maxRewards;
+
+                if (onMaxRewardAdLoadListener != null) {
+                    onMaxRewardAdLoadListener.onAdLoaded();
+                }
+                break;
             case FACEBOOK * INTERSTITIAL:
                 currentBaseInterstitialThirdParty = facebookInterstitial;
 
@@ -180,38 +297,6 @@ public class KafaAds implements OnAdLoadListener {
                     onInterstitialAdLoadListener.onAdLoaded();
                 }
                 break;
-            case ADMOB * BANNER:
-            case ADMOB * HALF_BANNER: {
-                com.google.android.gms.ads.AdView adView =
-                        (com.google.android.gms.ads.AdView) data;
-
-                container.removeAllViews();
-                container.addView(adView);
-                break;
-            }
-            case ADMOB * NATIVE: {
-//                UnifiedNativeAd unifiedNativeAd = (UnifiedNativeAd) data;
-//                View view = LayoutInflater.from(container.getContext())
-//                        .inflate(R.layout.view_admob_native, container, false);
-//                ImageView image = view.findViewById(R.id.view_admob_image);
-//                ImageView icon = view.findViewById(R.id.view_admob_icon);
-//                TextView headLine = view.findViewById(R.id.view_admob_headLine);
-//                TextView body = view.findViewById(R.id.view_admob_body);
-//
-//                image.setImageDrawable(unifiedNativeAd.getImages().get(0).getDrawable());
-//                if (unifiedNativeAd.getIcon() != null) {
-//                    icon.setVisibility(View.VISIBLE);
-//                    icon.setImageDrawable(unifiedNativeAd.getIcon().getDrawable());
-//                } else {
-//                    icon.setVisibility(View.GONE);
-//                }
-//                headLine.setText(unifiedNativeAd.getHeadline());
-//                body.setText(unifiedNativeAd.getBody());
-//
-//                container.removeAllViews();
-//                container.addView(view);
-                break;
-            }
             case FACEBOOK * BANNER:
             case FACEBOOK * HALF_BANNER: {
                 com.facebook.ads.AdView adView = (com.facebook.ads.AdView) data;
@@ -220,33 +305,96 @@ public class KafaAds implements OnAdLoadListener {
                 container.addView(adView);
                 break;
             }
-            case FACEBOOK * NATIVE: {
-//                NativeAd nativeAd = (NativeAd) data;
-//                View view = LayoutInflater.from(container.getContext())
-//                        .inflate(R.layout.view_facebook_native, container, false);
-//                MediaView media = view.findViewById(R.id.view_facebook_media);
-//                AdIconView icon = view.findViewById(R.id.view_facebook_icon);
-//                TextView headLine = view.findViewById(R.id.view_facebook_headLine);
-//                TextView body = view.findViewById(R.id.view_facebook_body);
-//                List<View> clickableViews = new ArrayList<>();
-//
-//                container.removeAllViews();
-//                container.addView(view);
-//
-//                nativeAd.downloadMedia();
-//                headLine.setText(nativeAd.getAdvertiserName());
-//                body.setText(nativeAd.getAdBodyText());
-//                clickableViews.add(icon);
-//                clickableViews.add(headLine);
-//                clickableViews.add(body);
-//
-//                nativeAd.registerViewForInteraction(view, media, icon, clickableViews);
-                break;
-            }
+//            case FACEBOOK * NATIVE: {
+////                NativeAd nativeAd = (NativeAd) data;
+////                View view = LayoutInflater.from(container.getContext())
+////                        .inflate(R.layout.view_facebook_native, container, false);
+////                MediaView media = view.findViewById(R.id.view_facebook_media);
+////                AdIconView icon = view.findViewById(R.id.view_facebook_icon);
+////                TextView headLine = view.findViewById(R.id.view_facebook_headLine);
+////                TextView body = view.findViewById(R.id.view_facebook_body);
+////                List<View> clickableViews = new ArrayList<>();
+////
+////                container.removeAllViews();
+////                container.addView(view);
+////
+////                nativeAd.downloadMedia();
+////                headLine.setText(nativeAd.getAdvertiserName());
+////                body.setText(nativeAd.getAdBodyText());
+////                clickableViews.add(icon);
+////                clickableViews.add(headLine);
+////                clickableViews.add(body);
+////
+////                nativeAd.registerViewForInteraction(view, media, icon, clickableViews);
+//                break;
+//            }
             default:
                 onAdFailedToLoad(ad);
                 break;
         }
+    }
+
+    @Override
+    public void onAdDisplayed(Ad ad) {
+
+    }
+
+    @Override
+    public void onAdHidden(Ad ad) {
+        if (ad.type == AdType.INTERSTITIAL &&
+                --interstitialCount <= 0) {
+            if (onMaxInterstitialAdLoadListener != null) {
+                onMaxInterstitialAdLoadListener.onAdHidden();
+            }
+        } else if (ad.type == AdType.REWARD) {
+            if (onMaxRewardAdLoadListener != null) {
+                onMaxRewardAdLoadListener.onAdHidden();
+            }
+        }
+    }
+
+    @Override
+    public void onAdClicked(Ad ad) {
+
+    }
+
+    @Override
+    public void onAdFailedToLoad(Ad ad, MaxError error) {
+        if (ad.type == AdType.INTERSTITIAL &&
+                --interstitialCount <= 0) {
+            if (onMaxInterstitialAdLoadListener != null) {
+                onMaxInterstitialAdLoadListener.onAdFailedToLoad();
+            }
+        } else if (ad.type == AdType.REWARD) {
+            if (onMaxRewardAdLoadListener != null) {
+                onMaxRewardAdLoadListener.onAdFailedToLoad();
+            }
+        } else {
+            adDataRepository.next(new AdDataSource.OnNextSuccessListener() {
+                @Override
+                public void onSuccess(@NonNull Ad ad) {
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "/onAdFailedToLoad//onSuccess" +
+                                "\nad type : " + ad.type +
+                                "\nad name : " + ad.name);
+                    }
+
+                    load(ad);
+                }
+            }, new AdDataSource.OnNextFailureListener() {
+                @Override
+                public void onFailure() {
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "/onAdFailedToLoad//onFailure");
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onAdDisplayFailed(Ad ad, MaxError error) {
+
     }
 
     @Override
@@ -257,9 +405,9 @@ public class KafaAds implements OnAdLoadListener {
                 onInterstitialAdLoadListener.onAdFailedToLoad();
             }
         } else if (ad.type == AdType.REWARD) {
-          if (onRewardAdLoadListener != null) {
-              onRewardAdLoadListener.onAdFailedToLoad();
-          }
+            if (onRewardAdLoadListener != null) {
+                onRewardAdLoadListener.onAdFailedToLoad();
+            }
         } else {
             adDataRepository.next(new AdDataSource.OnNextSuccessListener() {
                 @Override
@@ -332,6 +480,7 @@ public class KafaAds implements OnAdLoadListener {
     }
 
     private void load(Ad ad) {
+        //admob
         switch (ad.name.getCode() * ad.type.getCode()) {
             case ADMOB * BANNER:
             case ADMOB * HALF_BANNER:
@@ -342,15 +491,6 @@ public class KafaAds implements OnAdLoadListener {
                 }
 
                 adMobBanner.loadPreparedAd();
-                break;
-            case ADMOB * NATIVE:
-                if (adMobNative == null) {
-                    adMobNative = new AdMobNative(context, ad);
-
-                    adMobNative.setOnAdLoadListener(this);
-                }
-
-                adMobNative.loadPreparedAd();
                 break;
             case ADMOB * INTERSTITIAL:
                 if (adMobInterstitial == null) {
@@ -370,6 +510,34 @@ public class KafaAds implements OnAdLoadListener {
 
                 adMobReward.loadPreparedAd();
                 break;
+            //Applovin
+            case APPLOVIN * BANNER:
+            case APPLOVIN * HALF_BANNER:
+                if (maxBanner == null) {
+                    maxBanner = new MaxBanner(context, ad);
+
+                    maxBanner.setOnAppLovinAdListener(this);
+                }
+
+                maxBanner.loadPreparedAd();
+                break;
+            case APPLOVIN * INTERSTITIAL:
+                if (maxInterstitial == null) {
+                    maxInterstitial = new MaxInterstitial(context, ad);
+
+                    maxInterstitial.setOnAppLovinAdListener(this);
+                }
+                maxInterstitial.loadPreparedAd();
+                break;
+            case APPLOVIN * REWARD:
+                if (maxRewards == null) {
+                    maxRewards = new MaxRewards(context, ad);
+
+                    maxRewards.setOnAppLovinAdListener(this);
+                }
+                maxRewards.loadPreparedAd();
+                break;
+            //FBads
             case FACEBOOK * BANNER:
             case FACEBOOK * HALF_BANNER:
                 if (facebookBanner == null) {
@@ -380,15 +548,6 @@ public class KafaAds implements OnAdLoadListener {
 
                 facebookBanner.loadPreparedAd();
                 break;
-            case FACEBOOK * NATIVE:
-                if (facebookNative == null) {
-                    facebookNative = new FacebookNative(context, ad);
-
-                    facebookNative.setOnAdLoadListener(this);
-                }
-
-                facebookNative.loadPreparedAd();
-                break;
             case FACEBOOK * INTERSTITIAL:
                 if (facebookInterstitial == null) {
                     facebookInterstitial = new FacebookInterstitial(context, ad);
@@ -398,9 +557,19 @@ public class KafaAds implements OnAdLoadListener {
 
                 facebookInterstitial.loadPreparedAd();
                 break;
+            case FACEBOOK * NATIVE:
+                if (facebookNative == null) {
+                    facebookNative = new FacebookNative(context, ad);
+
+                    facebookNative.setOnAdLoadListener(this);
+                }
+
+                facebookNative.loadPreparedAd();
+                break;
         }
     }
 
+    // ========================== ADMOB ==================================================
     public void showInterstitial() {
         if (currentBaseInterstitialThirdParty != null) {
             currentBaseInterstitialThirdParty.showPreparedAd();
@@ -413,6 +582,51 @@ public class KafaAds implements OnAdLoadListener {
         }
     }
 
+    public void showNative(AdName adName, String nativeId, TemplateView templateView) {
+        switch (adName) {
+            case ADMOB:
+                AdLoader adLoader = new AdLoader.Builder(KafaAds.activity, nativeId)
+                        .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                            @Override
+                            public void onNativeAdLoaded(NativeAd nativeAd) {
+                                templateView.setNativeAd(nativeAd);
+                            }
+                        })
+                        .withAdListener(new AdListener() {
+                            @Override
+                            public void onAdFailedToLoad(LoadAdError adError) {
+                                Log.d("onAdFailed", "type: [ ADMOB ], kind: [ NATIVE ], errorCode: " + adError);
+                            }
+                        })
+                        .withNativeAdOptions(new NativeAdOptions.Builder()
+                                // Methods in the NativeAdOptions.Builder class can be
+                                // used here to specify individual options settings.
+                                .build())
+                        .build();
+                adLoader.loadAd(new AdRequest.Builder().build());
+                break;
+        }
+    }
+
+    public void showCustomNative(AdType adType, String nativeId, View view) {
+
+    }
+    // ========================== END ADMOB ==================================================
+
+    // ========================== APPLOVIN ==================================================
+    public void showMaxInterstitial() {
+        if (currentAppLovinInterstitial != null) {
+            currentAppLovinInterstitial.showPreparedAd();
+        }
+    }
+
+    public void showMaxReward() {
+        if (currentBaseAppLovinReward != null) {
+            currentBaseAppLovinReward.showPreparedAd();
+        }
+    }
+
+
     public void close() {
         if (mTimerTask != null
                 && mTimerTask.isRun()) {
@@ -422,7 +636,7 @@ public class KafaAds implements OnAdLoadListener {
         mTimerTask = null;
     }
 
-    public static class Builder {
+    public static class With {
         private Context context;
         private List<Ad> adList;
         private FrameLayout container;
@@ -430,44 +644,58 @@ public class KafaAds implements OnAdLoadListener {
         private int interstitialCount;
         private OnInterstitialAdLoadListener onInterstitialAdLoadListener;
         private OnRewardAdLoadListener onRewardAdLoadListener;
+        private OnMaxInterstitialAdLoadListener onMaxInterstitialAdLoadListener;
+        private OnMaxRewardAdLoadListener onMaxRewardAdLoadListener;
         private Boolean test_option = false;
 
-        public Builder(@NonNull Context context) {
+        public With(@NonNull Context context) {
             this.context = context;
             adList = new ArrayList<>();
             interstitialCount = 0;
         }
 
-        public Builder setBaseUrl(@Nullable String baseUrl) {
+        public With setBaseUrl(@Nullable String baseUrl) {
             adDataRepository = new AdDataRepository(baseUrl);
             return this;
         }
 
-        public Builder setAd(@NonNull Ad ad) {
+        public With setAd(@NonNull Ad ad) {
             adList.add(ad);
 
             return this;
         }
 
-        public Builder setContainer(@NonNull FrameLayout container) {
+        public With setContainer(@NonNull FrameLayout container) {
             this.container = container;
 
             return this;
         }
 
-        public Builder setOnInterstitialAdLoadListener(OnInterstitialAdLoadListener onInterstitialAdLoadListener) {
+        public With setOnInterstitialAdLoadListener(OnInterstitialAdLoadListener onInterstitialAdLoadListener) {
             this.onInterstitialAdLoadListener = onInterstitialAdLoadListener;
 
             return this;
         }
 
-        public Builder setOnRewardAdLoadListener(OnRewardAdLoadListener onRewardAdLoadListener) {
+        public With setOnRewardAdLoadListener(OnRewardAdLoadListener onRewardAdLoadListener) {
             this.onRewardAdLoadListener = onRewardAdLoadListener;
 
             return this;
         }
 
-        public Builder setAdmangerTest(Boolean flag) {
+        public With setOnMaxInterstitialAdLoadListener(OnMaxInterstitialAdLoadListener onMaxInterstitialAdLoadListener) {
+            this.onMaxInterstitialAdLoadListener = onMaxInterstitialAdLoadListener;
+
+            return this;
+        }
+
+        public With setOnMaxRewardAdLoadListener(OnMaxRewardAdLoadListener onMaxRewardAdLoadListener) {
+            this.onMaxRewardAdLoadListener = onMaxRewardAdLoadListener;
+
+            return this;
+        }
+
+        public With setAdmangerTest(Boolean flag) {
             this.test_option = flag;
             return this;
         }
@@ -565,6 +793,10 @@ public class KafaAds implements OnAdLoadListener {
                 break;
             case "GDRIVE":
                 base_url = "https://drive.google.com/uc?export=download&id=";
+                break;
+            case "SELFHOST":
+            case "":
+                base_url = "";
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + KafaAds.getSetting().get_baseServer());

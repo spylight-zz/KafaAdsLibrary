@@ -5,78 +5,102 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.kafaads.kafaadslibrary.BuildConfig;
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
 import com.cahyocool.kafaadslibrary.third.BaseInterstitialThirdParty;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
 
 public class AdMobInterstitial extends BaseInterstitialThirdParty {
-    private InterstitialAd interstitialAd;
+    private InterstitialAd mInterAd;
+    private AdRequest adRequest;
     private static final String TAG = AdMobInterstitial.class.getSimpleName();
-    private long startTime,endTime;
+    private long startTime, endTime;
+    private Ad ad;
+    private Context context;
 
-    public AdMobInterstitial(@NonNull Context context,
-                             @NonNull final Ad ad) {
+    public AdMobInterstitial(@NonNull Context context, @NonNull Ad ad) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "/AdMobInterstitial");
         }
+        this.context = context;
+        this.ad = ad;
+        adRequest = new AdRequest.Builder().build();
+        InterstitialAd.load(KafaAds.activity, ad.key, adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        //super.onAdLoaded(interstitialAd);
+                        endTime = System.currentTimeMillis();
+                        mInterAd = interstitialAd;
+                        if (KafaAds.TEST) {
+                            Log.d(KafaAds.TAG, "#1 onAdLoaded() - type: [ ADMOB ], kind: [ INTERSTITIAL ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
+                        }
 
-        interstitialAd = new InterstitialAd(context);
-        interstitialAd.setAdUnitId(ad.key);
-        interstitialAd.setAdListener(new AdListener() {
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                super.onAdFailedToLoad(errorCode);
-                endTime = System.currentTimeMillis();
-                if(KafaAds.TEST) {
-                    Log.d(KafaAds.TAG, "#1 onAdFailedToLoad() - type: [ ADMOB ], kind: [ INTERSTITIAL ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime-startTime)/1000)+"초");
-                    Log.d(KafaAds.TAG,"#1 onAdFailedToLoad() - type: [ ADMOB ], kind: [ INTERSTITIAL ], errorCode: "+errorCode);
-                }
-                if (onAdLoadListener != null) {
-                    onAdLoadListener.onAdFailedToLoad(ad);
-                }
-            }
+                        if (onAdLoadListener != null) {
+                            onAdLoadListener.onAdLoaded(ad, null);
+                        }
+                        mInterAd.setFullScreenContentCallback(
+                                new FullScreenContentCallback() {
+                                    @Override
+                                    public void onAdDismissedFullScreenContent() {
+                                        Log.d("TAG", "The ad was dismissed.");
+                                        mInterAd = null;
+                                        endTime = System.currentTimeMillis();
+                                        if (KafaAds.TEST) {
+                                            Log.d(KafaAds.TAG, "#1 onAdClosed() - type: [ ADMOB ], kind: [ INTERSTITIAL ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
+                                        }
 
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                endTime = System.currentTimeMillis();
-                if(KafaAds.TEST) {
-                    Log.d(KafaAds.TAG, "#1 onAdLoaded() - type: [ ADMOB ], kind: [ INTERSTITIAL ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime-startTime)/1000)+"초");
-                }
+                                        if (onAdLoadListener != null) {
+                                            onAdLoadListener.onAdClosed(ad);
+                                        }
+                                    }
 
-                if (onAdLoadListener != null) {
-                    onAdLoadListener.onAdLoaded(ad, null);
-                }
-            }
+                                    @Override
+                                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                        // Called when fullscreen content failed to show.
+                                        Log.d("TAG", "The ad failed to show.");
+                                        mInterAd = null;
+                                    }
 
-            @Override
-            public void onAdClosed() {
-                super.onAdClosed();
-                endTime = System.currentTimeMillis();
-                if(KafaAds.TEST) {
-                    Log.d(KafaAds.TAG, "#1 onAdClosed() - type: [ ADMOB ], kind: [ INTERSTITIAL ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime-startTime)/1000)+"초");
-                }
+                                    @Override
+                                    public void onAdShowedFullScreenContent() {
+                                        // Called when fullscreen content is shown.
+                                        Log.d("TAG", "The ad was shown.");
+                                    }
+                                });
+                    }
 
-                if (onAdLoadListener != null) {
-                    onAdLoadListener.onAdClosed(ad);
-                }
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        //super.onAdFailedToLoad(loadAdError);
+                        endTime = System.currentTimeMillis();
+                        mInterAd = null;
+                        if (KafaAds.TEST) {
+                            Log.d(KafaAds.TAG, "#1 onAdFailedToLoad() - type: [ ADMOB ], kind: [ INTERSTITIAL ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
+                            Log.d(KafaAds.TAG, "#1 onAdFailedToLoad() - type: [ ADMOB ], kind: [ INTERSTITIAL ], errorCode: " + loadAdError);
+                        }
+                        if (onAdLoadListener != null) {
+                            onAdLoadListener.onAdFailedToLoad(ad);
+                        }
+                    }
 
-            }
-        });
+                });
     }
 
     @Override
     public void loadPreparedAd() {
         startTime = System.currentTimeMillis();
-        interstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
     @Override
     public void showPreparedAd() {
-        interstitialAd.show();
+        mInterAd.show(KafaAds.activity);
     }
 }

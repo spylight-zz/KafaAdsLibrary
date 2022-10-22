@@ -2,14 +2,95 @@ package com.cahyocool.kafaadslibrary.models;
 
 public class KafaModel {
     String _status;
+    String _main_ads;
+    String _backup_ads;
+    String _backup_status;
     String _appid;
     String _banner;
     String _interstitial;
     String _reward;
     String _native;
     String _openapp;
+    String _backup_appid;
+    String _backup_banner;
+    String _backup_interstitial;
+    String _backup_reward;
+    String _backup_native;
+    String _backup_openapp;
     Boolean _app_suspend;
     String _link_app_redirect;
+
+    public String get_backup_status() {
+        return _backup_status;
+    }
+
+    public void set_backup_status(String _backup_status) {
+        this._backup_status = _backup_status;
+    }
+
+    public String get_main_ads() {
+        return _main_ads;
+    }
+
+    public void set_main_ads(String _main_ads) {
+        this._main_ads = _main_ads;
+    }
+
+    public String get_backup_ads() {
+        return _backup_ads;
+    }
+
+    public void set_backup_ads(String _backup_ads) {
+        this._backup_ads = _backup_ads;
+    }
+
+    public String get_backup_appid() {
+        return _backup_appid;
+    }
+
+    public void set_backup_appid(String _backup_appid) {
+        this._backup_appid = _backup_appid;
+    }
+
+    public String get_backup_banner() {
+        return _backup_banner;
+    }
+
+    public void set_backup_banner(String _backup_banner) {
+        this._backup_banner = _backup_banner;
+    }
+
+    public String get_backup_interstitial() {
+        return _backup_interstitial;
+    }
+
+    public void set_backup_interstitial(String _backup_interstitial) {
+        this._backup_interstitial = _backup_interstitial;
+    }
+
+    public String get_backup_reward() {
+        return _backup_reward;
+    }
+
+    public void set_backup_reward(String _backup_reward) {
+        this._backup_reward = _backup_reward;
+    }
+
+    public String get_backup_native() {
+        return _backup_native;
+    }
+
+    public void set_backup_native(String _backup_native) {
+        this._backup_native = _backup_native;
+    }
+
+    public String get_backup_openapp() {
+        return _backup_openapp;
+    }
+
+    public void set_backup_openapp(String _backup_openapp) {
+        this._backup_openapp = _backup_openapp;
+    }
 
     public String get_status() {
         return _status;

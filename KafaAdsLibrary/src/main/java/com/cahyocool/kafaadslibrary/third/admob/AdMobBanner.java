@@ -15,15 +15,15 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 
 public class AdMobBanner extends BaseThirdParty {
     private AdView adView;
     private static final String TAG = AdMobBanner.class.getSimpleName();
-    private long startTime,endTime;
+    private long startTime, endTime;
     private Context ctx;
 
-    public AdMobBanner(@NonNull Context context,
-                       @NonNull final Ad ad) {
+    public AdMobBanner(@NonNull Context context, @NonNull final Ad ad) {
         ctx = context;
         adView = new AdView(context);
         adView.setAdSize(ad.type == AdType.BANNER ? getAdSize() : ad.type == AdType.HALF_BANNER ? AdSize.MEDIUM_RECTANGLE : null);
@@ -34,10 +34,10 @@ public class AdMobBanner extends BaseThirdParty {
                 super.onAdLoaded();
                 endTime = System.currentTimeMillis();
                 if (onAdLoadListener != null) {
-                    if(KafaAds.TEST) {
-                        if(ad.type == AdType.HALF_BANNER){
-                            Log.d(KafaAds.TAG, "#1 onAdLoaded() - type: [ ADMOB ], kind: [ HALF_BANNER ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime-startTime)/1000)+"초");
-                        }else {
+                    if (KafaAds.TEST) {
+                        if (ad.type == AdType.HALF_BANNER) {
+                            Log.d(KafaAds.TAG, "#1 onAdLoaded() - type: [ ADMOB ], kind: [ HALF_BANNER ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
+                        } else {
                             Log.d(KafaAds.TAG, "#1 onAdLoaded() - type: [ ADMOB ], kind: [ BANNER ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
                         }
                     }
@@ -46,14 +46,14 @@ public class AdMobBanner extends BaseThirdParty {
             }
 
             @Override
-            public void onAdFailedToLoad(int errorCode) {
+            public void onAdFailedToLoad(LoadAdError errorCode) {
                 super.onAdFailedToLoad(errorCode);
                 endTime = System.currentTimeMillis();
-                if(KafaAds.TEST) {
-                    if(ad.type == AdType.HALF_BANNER) {
+                if (KafaAds.TEST) {
+                    if (ad.type == AdType.HALF_BANNER) {
                         Log.d(KafaAds.TAG, "#1 onAdFailed() - type: [ ADMOB ], kind: [ HALF_BANNER ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
                         Log.d(KafaAds.TAG, "#1 onAdFailed() - type: [ ADMOB ], kind: [ HALF_BANNER ], errorCode: " + errorCode);
-                    }else{
+                    } else {
                         Log.d(KafaAds.TAG, "#1 onAdFailed() - type: [ ADMOB ], kind: [ BANNER ], CURRENT_TIME_MILLIS: " + String.valueOf((endTime - startTime) / 1000) + "초");
                         Log.d(KafaAds.TAG, "#1 onAdFailed() - type: [ ADMOB ], kind: [ BANNER ], errorCode: " + errorCode);
                     }
