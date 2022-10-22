@@ -2,7 +2,8 @@ package com.cahyocool.kafaadslibrary.data;
 
 public enum AdName {
     FACEBOOK("FACEBOOK", 2),
-    ADMOB("ADMOB", 3);
+    ADMOB("ADMOB", 3),
+    APPLOVIN("APPLOVIN", 4);
 
     private final String name;
     private final int code;
