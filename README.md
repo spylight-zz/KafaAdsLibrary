@@ -114,9 +114,10 @@ KafaAds.getAds().get_banner()
 ..<etc>
 ```
 ##### Initialize Ads
-To initialize ads, you can call the function like
+To initialize ads, you can call the function like below<br/>
+note : since SDK 20+ version, Admob cannot passing APPID on initialize
 ```java
-KafaAds.initAd(context,<Your-AppId> or from model ex: KafaAds.getAds().get_appid());
+KafaAds.initAd(activity);
 ```
 ##### Banner
 This example to display BannerAd
