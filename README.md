@@ -1,4 +1,4 @@
-# KafaAds Library Admob And FAN for Android
+# KafaAds Library Admob, AppLovin And FB FAN for Android
 
 ## Table of Contents
 + [About](#about)
@@ -7,22 +7,42 @@
 + [Contributing](../CONTRIBUTING.md)
 
 ## About
-This library help to display ads from Admob or FAN, you can use it for simple display Ads to your app
+This library help to you display ads from Admob, AppLovin or FAN, you can use it for simple display Ads to your app
 
 ## Getting Started
-This library support Admob and FAN provider
+This library support Admob, AppLovin and FAN provider
 - Admob
-  - Admob SDK 19.7.0
-  - Google Play Services 19.0.0
+  - Admob SDK 21.3.0
   - Lifecycle-runtime 2.2.0
   - Lifecycle-compiler 2.2.0
   - Lifecycle-Extensions 2.2.0
 - FAN
   - FAN SDK 5.10.1
+- AppLovin
+  - SDK 11.5.3 
+  - lifecycle-process:2.5.1
 - Retrofit 2.7.1
 - Gson 2.9.0
 - Glide 4.13.1
 
+View Support Ads
+- Admob
+  - Banner
+  - Interstitial
+  - Native
+  - OpenApp Ads
+  - Rewards
+- AppLovin
+  - Banner
+  - Interstitial
+  - OpenApp Ads
+  - Rewards
+- FAN
+  - Banner
+  - Interstitial
+  - OpenApp Ads
+  - Rewards
+  
 ### Prerequisites
 What things you need to install the software and how to install them, use Jitpack
 
@@ -42,7 +62,7 @@ Add the dependency
 
 ```Groove
 dependencies {
-	implementation 'com.github.spylight-zz:KafaAdsLibrary:1.0.1'
+	implementation 'com.github.spylight-zz:KafaAdsLibrary:2.1'
 }
 ```
 
@@ -55,6 +75,31 @@ To use the library for display ads are simple, let's code.
 private KafaAds ads;
 ```
 The library comes with the model, so you can store your data into the model and pass it into your app
+there are support local json or remote json ads.
+below this setting json example for ads
+```json
+{
+	"status":"1",
+	"main-ads":"Admob",
+	"backup-ads":"Applovin",
+	"backup-status":"0",
+	"appid":"ca-app-pub-3940256099942544~3347510000",
+	"banner":"ca-app-pub-3940256099942544/6300978111",
+	"inters":"ca-app-pub-3940256099942544/1033173712",
+	"rewa":"ca-app-pub-3940256099942544/5224354917",
+	"native":"ca-app-pub-3940256099942544/2247696110",
+	"openapp":"ca-app-pub-3940256099942544/3419835294",
+	"backup-appid":"<YOUR SDK KEY APPLOVIN OR FB FAN KEY>",
+    	"backup-banner":"<YOUR BANNER ID APPLOVIN OR FB FAN>",
+    	"backup-inters":"<YOUR INTERSTITIAL ID APPLOVIN OR FB FAN>",
+    	"backup-rewa":"<YOUR REWARDS ID APPLOVIN OR FB FAN>",
+	"backup-native":"<OPTIONAL - STILL ON PROGRESS>",
+    	"backup-openapp":"<YOUR OPENAPP ID APPLOVIN OR FB FAN>",
+	"app_suspend":false,
+	"link_app_redirect":"<LINK TO REDIRECT IF APP SUSPEND, APP SUSPEN MUST BE SET TO TRUE>"
+}
+```
+and now in your code, you can write like below
 ```java
 KafaModel kafaModel = new KafaModel();
 kafaModel.set_appid(<Your-AppId> or from json object ex:jo.optString(KafaConst.APPID));
@@ -69,9 +114,10 @@ KafaAds.getAds().get_banner()
 ..<etc>
 ```
 ##### Initialize Ads
-To initialize ads, you can call the function like
+To initialize ads, you can call the function like below<br/>
+note : since SDK 20+ version, Admob cannot passing APPID on initialize
 ```java
-KafaAds.initAd(context,<Your-AppId> or from model ex: KafaAds.getAds().get_appid());
+KafaAds.initAd(activity);
 ```
 ##### Banner
 This example to display BannerAd
@@ -93,13 +139,15 @@ ads = new KafaAds.Builder(context)
     .build();
 ads.load();
 
-//for Admob and FAN
+//for AppLovin
 ads = new KafaAds.Builder(context)
     .setContainer(findViewById(R.id.lyt_banner))
-    .setAd(new Ad(AdName.FACEBOOK, AdType.BANNER, "YOUR-FAN-BANNERID"))
-    .setAd(new Ad(AdName.ADMOB, AdType.BANNER, KafaAds.getAds().get_banner()))
+    .setAd(new Ad(AdName.APPLOVIN, AdType.BANNER, "YOUR-FAN-BANNERID"))
     .build();
 ads.load();
+
+/* Interstitial
+
 ```
 
 
