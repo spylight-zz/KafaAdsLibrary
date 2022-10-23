@@ -67,7 +67,7 @@ public class AdMobBanner extends BaseThirdParty {
 
     public AdSize getAdSize() {
         // Step 2 - Determine the screen width (less decorations) to use for the ad width.
-        Display display = KafaAds.getActivity(ctx).getWindowManager().getDefaultDisplay();
+        Display display = KafaAds.activity.getWindowManager().getDefaultDisplay();
         DisplayMetrics outMetrics = new DisplayMetrics();
         display.getMetrics(outMetrics);
 
