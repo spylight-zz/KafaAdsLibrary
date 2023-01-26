@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
 import com.cahyocool.kafaadslibrary.data.AdType;
-import com.cahyocool.kafaadslibrary.third.BaseThirdParty;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;

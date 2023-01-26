@@ -14,7 +14,6 @@ import com.applovin.mediation.MaxError;
 import com.applovin.mediation.ads.MaxAdView;
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
-import com.cahyocool.kafaadslibrary.third.BaseAppLovin;
 import com.kafaads.kafaadslibrary.R;
 
 public class MaxBanner extends BaseAppLovin {
@@ -24,11 +23,15 @@ public class MaxBanner extends BaseAppLovin {
     public MaxBanner(@NonNull Context context, @NonNull final Ad adx) {
         this.ctx = context;
         maxAdView = new MaxAdView(adx.key, KafaAds.activity);
-        // Stretch to the width of the screen for banners to be fully functional
-        int width = ViewGroup.LayoutParams.MATCH_PARENT;
-        // Banner height on phones and tablets is 50 and 90, respectively
-        int heightPx = KafaAds.activity.getResources().getDimensionPixelSize(R.dimen.banner_height);
-        maxAdView.setLayoutParams(new FrameLayout.LayoutParams(width, heightPx, Gravity.BOTTOM));
+        if (KafaAds.getMaxBannerCustom()) {
+            maxAdView.setLayoutParams(KafaAds.getMaxBanner());
+        } else {
+            // Stretch to the width of the screen for banners to be fully functional
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            // Banner height on phones and tablets is 50 and 90, respectively
+            int heightPx = KafaAds.activity.getResources().getDimensionPixelSize(R.dimen.banner_height);
+            maxAdView.setLayoutParams(new FrameLayout.LayoutParams(width, heightPx, Gravity.BOTTOM));
+        }
         maxAdView.setBackgroundColor(ContextCompat.getColor(KafaAds.activity, R.color.gnt_white));
         ViewGroup rootView = KafaAds.activity.findViewById(android.R.id.content);
         rootView.addView(maxAdView);

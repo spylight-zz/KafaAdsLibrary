@@ -18,6 +18,7 @@ public class Ad {
     @SerializedName("image")
     public String image;
 
+
     public Ad(AdName name,
               AdType type,
               String key) {

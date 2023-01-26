@@ -19,4 +19,8 @@ public class KafaConst {
     public static String BACKUP_OPENAPP = "backup-openapp";
     public static String APP_SUSPEND = "app_suspend";
     public static String LINK_APP_REDIRECT = "link_app_redirect";
+    public static String INTERVAL_ADS_INTERS = "interval-ads-inters";
+    public static String INTERVAL_ADS_REWA = "interval-ads-rewa";
+    public static String INTERVAL_ADS_NATIVE = "interval-ads-native";
+    public static String UNITY_TEST_MODE = "unity-test-mode";
 }

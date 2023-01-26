@@ -12,7 +12,6 @@ import com.applovin.mediation.MaxError;
 import com.applovin.mediation.ads.MaxInterstitialAd;
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
-import com.cahyocool.kafaadslibrary.third.BaseAppLovinInterstitial;
 import com.kafaads.kafaadslibrary.BuildConfig;
 
 import java.util.concurrent.TimeUnit;

@@ -7,12 +7,10 @@ import androidx.annotation.NonNull;
 
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
-import com.cahyocool.kafaadslibrary.third.BaseRewardThirdParty;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;

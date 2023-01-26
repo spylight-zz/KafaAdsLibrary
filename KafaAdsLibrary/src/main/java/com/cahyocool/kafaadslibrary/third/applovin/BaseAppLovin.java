@@ -1,4 +1,4 @@
-package com.cahyocool.kafaadslibrary.third;
+package com.cahyocool.kafaadslibrary.third.applovin;
 
 public abstract class BaseAppLovin {
     public OnAppLovinAdListener onAppLovinAdListener;

@@ -12,7 +12,6 @@ import com.applovin.mediation.MaxRewardedAdListener;
 import com.applovin.mediation.ads.MaxRewardedAd;
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
-import com.cahyocool.kafaadslibrary.third.BaseAppLovinReward;
 import com.kafaads.kafaadslibrary.BuildConfig;
 
 import java.util.concurrent.TimeUnit;

@@ -1,4 +1,4 @@
-package com.cahyocool.kafaadslibrary.third;
+package com.cahyocool.kafaadslibrary.third.applovin;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

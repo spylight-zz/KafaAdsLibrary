@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.kafaads.kafaadslibrary.BuildConfig;
 import com.cahyocool.kafaadslibrary.KafaAds;
-import com.cahyocool.kafaadslibrary.third.BaseInterstitialThirdParty;
+import com.cahyocool.kafaadslibrary.third.admob.BaseInterstitialThirdParty;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.InterstitialAd;

@@ -19,6 +19,42 @@ public class KafaModel {
     String _backup_openapp;
     Boolean _app_suspend;
     String _link_app_redirect;
+    int _interval_ads_inters;
+    int _interval_ads_rewa;
+    int _interval_ads_native;
+    Boolean _unity_test_mode;
+
+    public Boolean get_unity_test_mode() {
+        return _unity_test_mode;
+    }
+
+    public void set_unity_test_mode(Boolean _unity_test_mode) {
+        this._unity_test_mode = _unity_test_mode;
+    }
+
+    public int get_interval_ads_inters() {
+        return _interval_ads_inters;
+    }
+
+    public void set_interval_ads_inters(int _interval_ads_inters) {
+        this._interval_ads_inters = _interval_ads_inters;
+    }
+
+    public int get_interval_ads_rewa() {
+        return _interval_ads_rewa;
+    }
+
+    public void set_interval_ads_rewa(int _interval_ads_rewa) {
+        this._interval_ads_rewa = _interval_ads_rewa;
+    }
+
+    public int get_interval_ads_native() {
+        return _interval_ads_native;
+    }
+
+    public void set_interval_ads_native(int _interval_ads_native) {
+        this._interval_ads_native = _interval_ads_native;
+    }
 
     public String get_backup_status() {
         return _backup_status;

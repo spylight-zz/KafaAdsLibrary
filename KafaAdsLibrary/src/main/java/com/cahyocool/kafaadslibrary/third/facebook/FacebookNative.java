@@ -5,7 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.cahyocool.kafaadslibrary.third.BaseThirdParty;
+import com.cahyocool.kafaadslibrary.third.admob.BaseThirdParty;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.NativeAd;

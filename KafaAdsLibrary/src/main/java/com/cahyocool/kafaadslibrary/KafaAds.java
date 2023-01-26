@@ -8,13 +8,21 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxError;
+import com.applovin.mediation.nativeAds.MaxNativeAdListener;
+import com.applovin.mediation.nativeAds.MaxNativeAdLoader;
+import com.applovin.mediation.nativeAds.MaxNativeAdView;
+import com.applovin.mediation.nativeAds.adPlacer.MaxAdPlacer;
+import com.applovin.mediation.nativeAds.adPlacer.MaxAdPlacerSettings;
+import com.applovin.mediation.nativeAds.adPlacer.MaxRecyclerAdapter;
 import com.applovin.sdk.AppLovinSdk;
 import com.applovin.sdk.AppLovinSdkConfiguration;
 import com.cahyocool.kafaadslibrary.data.Ad;
@@ -24,12 +32,14 @@ import com.cahyocool.kafaadslibrary.data.AdName;
 import com.cahyocool.kafaadslibrary.data.AdType;
 import com.cahyocool.kafaadslibrary.models.KafaAppSetting;
 import com.cahyocool.kafaadslibrary.models.KafaModel;
-import com.cahyocool.kafaadslibrary.third.BaseAppLovinInterstitial;
-import com.cahyocool.kafaadslibrary.third.BaseAppLovinReward;
-import com.cahyocool.kafaadslibrary.third.BaseInterstitialThirdParty;
-import com.cahyocool.kafaadslibrary.third.BaseRewardThirdParty;
-import com.cahyocool.kafaadslibrary.third.OnAdLoadListener;
-import com.cahyocool.kafaadslibrary.third.OnAppLovinAdListener;
+import com.cahyocool.kafaadslibrary.third.applovin.BaseAppLovinInterstitial;
+import com.cahyocool.kafaadslibrary.third.applovin.BaseAppLovinReward;
+import com.cahyocool.kafaadslibrary.third.admob.BaseInterstitialThirdParty;
+import com.cahyocool.kafaadslibrary.third.admob.BaseRewardThirdParty;
+import com.cahyocool.kafaadslibrary.third.admob.OnAdLoadListener;
+import com.cahyocool.kafaadslibrary.third.applovin.OnAppLovinAdListener;
+import com.cahyocool.kafaadslibrary.third.unity.IUnityAdsShowListener;
+import com.cahyocool.kafaadslibrary.third.unity.OnUnityAdListener;
 import com.cahyocool.kafaadslibrary.third.admob.AdMobBanner;
 import com.cahyocool.kafaadslibrary.third.admob.AdMobInterstitial;
 import com.cahyocool.kafaadslibrary.third.admob.AdMobReward;
@@ -42,6 +52,10 @@ import com.cahyocool.kafaadslibrary.third.applovin.MaxRewards;
 import com.cahyocool.kafaadslibrary.third.facebook.FacebookBanner;
 import com.cahyocool.kafaadslibrary.third.facebook.FacebookInterstitial;
 import com.cahyocool.kafaadslibrary.third.facebook.FacebookNative;
+import com.cahyocool.kafaadslibrary.third.unity.UnityBanner;
+import com.cahyocool.kafaadslibrary.third.unity.UnityCore;
+import com.cahyocool.kafaadslibrary.third.unity.UnityInterstitial;
+import com.cahyocool.kafaadslibrary.third.unity.UnityReward;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
@@ -52,6 +66,9 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.kafaads.kafaadslibrary.BuildConfig;
+import com.unity3d.ads.IUnityAdsLoadListener;
+import com.unity3d.ads.UnityAds;
+import com.unity3d.ads.UnityAdsShowOptions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -60,10 +77,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
+import kotlin.Unit;
+
+public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener, OnUnityAdListener {
     private Context context;
     public static Activity activity;
-    private final AdDataRepository adDataRepository;
+    private AdDataRepository adDataRepository;
     private FrameLayout container;
     private Timer mTimer;
     private int interstitialCount;
@@ -81,6 +100,7 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
     private MaxBanner maxBanner;
     private MaxRewards maxRewards;
     private MaxInterstitial maxInterstitial;
+    private UnityBanner unityBanner;
     private LoadHandler mHandler;
     private Runnable mRunnable;
     private BaseInterstitialThirdParty currentBaseInterstitialThirdParty;
@@ -90,6 +110,7 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
     private static final int FACEBOOK = 2;
     private static final int ADMOB = 3;
     private static final int APPLOVIN = 4;
+    private static final int UNITY = 5;
     private static final int HOUSE = 13;
     private static final int BANNER = 101;
     private static final int HALF_BANNER = 103;
@@ -145,6 +166,9 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
                         }
                     });
                     break;
+                case "Unity":
+                    UnityAds.initialize(activity, KafaAds.getAds().get_backup_appid(), KafaAds.getAds().get_unity_test_mode());
+                    break;
                 case "FBAds":
                     break;
             }
@@ -169,14 +193,14 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
         return res;
     }
 
-    public static void initOpenAd(Application app, String statAds, String Ads, String AppOpenId) {
-        if (statAds.equalsIgnoreCase("1")) {
-            switch (Ads) {
+    public static void initOpenAd(Application app) {
+        if (KafaAds.getAds().get_backup_status().equalsIgnoreCase("1")) {
+            switch (KafaAds.getAds().get_backup_ads()) {
                 case "Applovin":
                     AppLovinSdk.initializeSdk(app.getApplicationContext(), new AppLovinSdk.SdkInitializationListener() {
                         @Override
                         public void onSdkInitialized(final AppLovinSdkConfiguration configuration) {
-                            MaxAppOpen maxAppOpen = new MaxAppOpen(app.getApplicationContext(), AppOpenId);
+                            MaxAppOpen maxAppOpen = new MaxAppOpen(app.getApplicationContext(), KafaAds.getAds().get_backup_openapp());
                         }
                     });
                     break;
@@ -185,6 +209,10 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
             AppOpenManager appOpenManager = new AppOpenManager(app);
         }
 
+    }
+
+    public KafaAds(Context context) {
+        context = context;
     }
 
     private KafaAds(With with) {
@@ -290,6 +318,15 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
                     onMaxRewardAdLoadListener.onAdLoaded();
                 }
                 break;
+            case UNITY * BANNER:
+            case UNITY * HALF_BANNER: {
+                com.unity3d.services.banners.BannerView adView =
+                        (com.unity3d.services.banners.BannerView) data;
+
+                container.removeAllViews();
+                container.addView(adView);
+                break;
+            }
             case FACEBOOK * INTERSTITIAL:
                 currentBaseInterstitialThirdParty = facebookInterstitial;
 
@@ -305,29 +342,6 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
                 container.addView(adView);
                 break;
             }
-//            case FACEBOOK * NATIVE: {
-////                NativeAd nativeAd = (NativeAd) data;
-////                View view = LayoutInflater.from(container.getContext())
-////                        .inflate(R.layout.view_facebook_native, container, false);
-////                MediaView media = view.findViewById(R.id.view_facebook_media);
-////                AdIconView icon = view.findViewById(R.id.view_facebook_icon);
-////                TextView headLine = view.findViewById(R.id.view_facebook_headLine);
-////                TextView body = view.findViewById(R.id.view_facebook_body);
-////                List<View> clickableViews = new ArrayList<>();
-////
-////                container.removeAllViews();
-////                container.addView(view);
-////
-////                nativeAd.downloadMedia();
-////                headLine.setText(nativeAd.getAdvertiserName());
-////                body.setText(nativeAd.getAdBodyText());
-////                clickableViews.add(icon);
-////                clickableViews.add(headLine);
-////                clickableViews.add(body);
-////
-////                nativeAd.registerViewForInteraction(view, media, icon, clickableViews);
-//                break;
-//            }
             default:
                 onAdFailedToLoad(ad);
                 break;
@@ -510,7 +524,6 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
 
                 adMobReward.loadPreparedAd();
                 break;
-            //Applovin
             case APPLOVIN * BANNER:
             case APPLOVIN * HALF_BANNER:
                 if (maxBanner == null) {
@@ -537,7 +550,16 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
                 }
                 maxRewards.loadPreparedAd();
                 break;
-            //FBads
+            case UNITY * BANNER:
+            case UNITY * HALF_BANNER:
+                if (unityBanner == null) {
+                    unityBanner = new UnityBanner(context, ad);
+
+                    unityBanner.setOnUnityAdListener(this);
+                }
+
+                unityBanner.loadPreparedAd();
+                break;
             case FACEBOOK * BANNER:
             case FACEBOOK * HALF_BANNER:
                 if (facebookBanner == null) {
@@ -608,12 +630,30 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
         }
     }
 
-    public void showCustomNative(AdType adType, String nativeId, View view) {
-
-    }
     // ========================== END ADMOB ==================================================
+    // ========================== APPLOVIN ===================================================
+    private static boolean _check;
+    private static FrameLayout.LayoutParams _maxParams;
+    private static int _width, _height, _position;
 
-    // ========================== APPLOVIN ==================================================
+    public static void setMaxBannerCustom(boolean check) {
+        _check = check;
+    }
+
+    public static Boolean getMaxBannerCustom() {
+        return _check;
+    }
+
+    public static void setMaxBanner(int width, int height, int position) {
+        _width = width;
+        _height = height;
+        _position = position;
+    }
+
+    public static FrameLayout.LayoutParams getMaxBanner() {
+        return new FrameLayout.LayoutParams(_width, _height, _position);
+    }
+
     public void showMaxInterstitial() {
         if (currentAppLovinInterstitial != null) {
             currentAppLovinInterstitial.showPreparedAd();
@@ -626,6 +666,89 @@ public class KafaAds implements OnAdLoadListener, OnAppLovinAdListener {
         }
     }
 
+    public void showMaxNativeTemplate(FrameLayout nativeAdContainer, String nativeId) {
+        MaxNativeAdLoader nativeAdLoader;
+        final MaxAd[] nativeAd = {null};
+
+        nativeAdLoader = new MaxNativeAdLoader(nativeId, KafaAds.activity);
+        nativeAdLoader.setNativeAdListener(new MaxNativeAdListener() {
+            @Override
+            public void onNativeAdLoaded(final MaxNativeAdView nativeAdView, final MaxAd ad) {
+                // Clean up any pre-existing native ad to prevent memory leaks.
+                if (nativeAd[0] != null) {
+                    nativeAdLoader.destroy(nativeAd[0]);
+                }
+                // Save ad for cleanup.
+                nativeAd[0] = ad;
+                // Add ad view to view.
+                nativeAdContainer.removeAllViews();
+                nativeAdContainer.addView(nativeAdView);
+            }
+
+            @Override
+            public void onNativeAdLoadFailed(final String adUnitId, final MaxError error) {
+                // We recommend retrying with exponentially higher delays up to a maximum delay
+            }
+
+            @Override
+            public void onNativeAdClicked(final MaxAd ad) {
+                // Optional click callback
+            }
+        });
+        nativeAdLoader.loadAd();
+    }
+
+    public void showMaxNativePlacer(RecyclerView recyclerView, String nativeId, int fixedPos, int fixedPos2, int interval) {
+        MaxRecyclerAdapter adAdapter;
+        RecyclerView.Adapter adapter;
+
+        adapter = recyclerView.getAdapter();
+        MaxAdPlacerSettings settings = new MaxAdPlacerSettings(nativeId);
+        settings.addFixedPosition(fixedPos);
+        settings.addFixedPosition(fixedPos2);
+        settings.setRepeatingInterval(interval);
+
+        adAdapter = new MaxRecyclerAdapter(settings, adapter, KafaAds.activity);
+        adAdapter.setListener(new MaxAdPlacer.Listener() {
+            @Override
+            public void onAdLoaded(final int position) {
+            }
+
+            @Override
+            public void onAdRemoved(final int position) {
+            }
+
+            @Override
+            public void onAdClicked(final MaxAd ad) {
+            }
+
+            @Override
+            public void onAdRevenuePaid(final MaxAd ad) {
+            }
+        });
+        recyclerView.setAdapter(adAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(KafaAds.activity));
+
+        adAdapter.loadAds();
+    }
+
+    // ========================== END ADMOB ==================================================
+    // ========================== Unity ======================================================
+    public void unityShowInterstitial(String intersID, IUnityAdsShowListener showListener) {
+        UnityInterstitial interstitial = new UnityInterstitial(intersID, showListener);
+        interstitial.showInterstitial();
+    }
+
+    public void unityShowReward(String rewardId, IUnityAdsShowListener showListener) {
+        UnityReward reward = new UnityReward(rewardId, showListener);
+        reward.showReward();
+    }
+
+    public void showUnityBanner(FrameLayout layout, Ad ad) {
+        UnityCore core = new UnityCore(context);
+        core.showBanner(layout, ad);
+    }
+    // ========================== END Unity ==================================================
 
     public void close() {
         if (mTimerTask != null

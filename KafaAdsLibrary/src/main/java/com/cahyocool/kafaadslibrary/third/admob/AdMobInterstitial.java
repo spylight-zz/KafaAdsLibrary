@@ -12,8 +12,6 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.kafaads.kafaadslibrary.BuildConfig;
 import com.cahyocool.kafaadslibrary.KafaAds;
 import com.cahyocool.kafaadslibrary.data.Ad;
-import com.cahyocool.kafaadslibrary.third.BaseInterstitialThirdParty;
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 
