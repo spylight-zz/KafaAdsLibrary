@@ -22,6 +22,8 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
@@ -56,4 +58,17 @@ dependencies {
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.13.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.1'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.spylight-zz' //your git id
+                artifactId = 'KafaAdsLibrary' //your-repository
+                version = '2.2.5.1' // As same as the Tag
+            }
+        }
+    }
 }
