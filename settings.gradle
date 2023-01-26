@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "KafaAdsLibrary"
 include ':app'
 include ':KafaAdsLibrary'
+include ':unityads'
