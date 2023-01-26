@@ -66,7 +66,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.spylight-zz' //your git id
                 artifactId = 'KafaAdsLibrary' //your-repository
-                version = '2.2.1' // As same as the Tag
+                version = '2.2.1.1' // As same as the Tag
             }
         }
     }
