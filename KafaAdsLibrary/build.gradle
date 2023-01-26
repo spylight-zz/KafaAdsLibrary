@@ -59,7 +59,6 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.13.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.1'
 }
-
 afterEvaluate {
     publishing {
         publications {
@@ -67,7 +66,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.spylight-zz' //your git id
                 artifactId = 'KafaAdsLibrary' //your-repository
-                version = '2.2.5.1' // As same as the Tag
+                version = '2.2.1' // As same as the Tag
             }
         }
     }
