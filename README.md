@@ -278,6 +278,137 @@ showListener = new IUnityAdsShowListener() {
 ads = new KafaAds(context);
 ads.unityShowInterstitial(KafaAds.getAds().get_backup_interstitial(), showListener);
 ```
+##### Rewards
+This example to display RewardsAd
+```java
+/* RewardsAd
+ * 
+ */
+//for Admob
+ads = new KafaAds.With(context)
+	.setAd(new Ad(AdName.ADMOB, AdType.REWARD, KafaAds.getAds().get_reward()))
+	.setOnRewardAdLoadListener(new OnRewardAdLoadListener() {
+		@Override
+		public void onAdLoaded() {
+			ads.showReward();
+			Log.d("showRewa", "iklan rewa muncul");
+		}
+
+		@Override
+		public void onAdFailedToLoad() {
+
+		}
+
+		@Override
+		public void onAdClosed() {
+			Log.d("closedRewa", "iklan rewa closed");
+		}
+	})
+	.build();
+ads.load();
+
+//for AppLovin
+ads = new KafaAds.With(context)
+	.setAd(new Ad(AdName.APPLOVIN, AdType.REWARD, KafaAds.getAds().get_backup_reward()))
+	.setOnMaxRewardAdLoadListener(new OnMaxRewardAdLoadListener() {
+		@Override
+		public void onAdExpanded() {
+
+		}
+
+		@Override
+		public void onAdCollapsed() {
+
+		}
+
+		@Override
+		public void onAdLoaded() {
+			ads.showMaxReward();
+			Log.d("showReward", "iklan max reward muncul");
+		}
+
+		@Override
+		public void onAdDisplayed() {
+
+		}
+
+		@Override
+		public void onAdHidden() {
+			Log.d("closedInter", "iklan max reward closed");
+		}
+
+		@Override
+		public void onAdClicked() {
+
+		}
+
+		@Override
+		public void onAdFailedToLoad() {
+
+		}
+
+		@Override
+		public void onAdDisplayFailed() {
+
+		}
+	})
+	.build();
+ads.load();
+
+//for UnityAds
+IUnityAdsShowListener showListener;
+showListener = new IUnityAdsShowListener() {
+	@Override
+	public void onUnityAdsShowFailure(String placementId, UnityAdsShowError unityAdsShowError, String message) {
+
+	}
+
+	@Override
+	public void onUnityAdsShowStart(String placementId) {
+		Log.d("showReward", "iklan rewa muncul " + placementId);
+	}
+
+	@Override
+	public void onUnityAdsShowClick(String placementId) {
+		Log.d("showClick", "iklan rewa klik " + placementId);
+	}
+
+	@Override
+	public void onUnityAdsShowComplete(String placementId) {
+		Log.d("showComplete", "iklan rewa complete " + placementId);
+	}
+};
+ads = new KafaAds(context);
+ads.unityShowReward(KafaAds.getAds().get_backup_reward(), showListener);
+```
+##### Native
+This example to display NativeAd
+```java
+/* NativeAdAd
+ * 
+ */
+//for Admob
+NativeTemplateStyle styles = new
+	NativeTemplateStyle.Builder().withMainBackgroundColor(null).build();
+TemplateView templateView = activity.findViewById(R.id.nativeTemplateView);
+templateView.setVisibility(View.VISIBLE);
+templateView.setStyles(styles);
+ads = new KafaAds(context);
+ads.showNative(AdName.ADMOB, KafaAds.getAds().get_native(), templateView);
+
+//for AppLovin
+FrameLayout frameLayout = activity.findViewById(R.id.max_native_ad);
+frameLayout.setVisibility(View.VISIBLE);
+ads = new KafaAds(context);
+ads.showMaxNativeTemplate(frameLayout, KafaAds.getAds().get_backup_native()); 
+``` 
+
+I will continue to develop this library and I will be very happy if anyone wants to help develop this library.
+
+Thank you for using this library.
+
+You can also help me with some donations to make me more enthusiastic about developing this library.
+please click [Buy me a coffee](https://www.buymeacoffee.com/spylight)
 
 ## Authors
 Made with ❤ by [@spylight-zz](https://www.github.com/spylight-zz)
