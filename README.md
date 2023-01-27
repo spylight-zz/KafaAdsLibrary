@@ -149,17 +149,29 @@ ads = new KafaAds.Builder(context)
     .build();
 ads.load();
 
+//for AppLovin
+//AppLovin banner default are BOTTOM place, but you can setting it to custom Place, like below code,
+//KafaAds.setMaxBannerCustom(true);
+//KafaAds.setMaxBanner(ViewGroup.LayoutParams.MATCH_PARENT,
+//	activity.getResources().getDimensionPixelSize(com.kafaads.kafaadslibrary.R.dimen.banner_height),
+//  Gravity.TOP);
+ads = new KafaAds.Builder(context)
+    .setContainer(findViewById(R.id.lyt_banner))
+    .setAd(new Ad(AdName.APPLOVIN, AdType.BANNER, "YOUR-AppLovin-BANNERID"))
+    .build();
+ads.load();
+
+//for UnityAds
+ads = new KafaAds.With(context)
+    .setContainer(activity.findViewById(R.id.lyt_banner))
+    .setAd(new Ad(AdName.UNITY, AdType.BANNER, KafaAds.getAds().get_backup_banner()))
+    .build();
+ads.load();
+
 //for FAN
 ads = new KafaAds.Builder(context)
     .setContainer(findViewById(R.id.lyt_banner))
     .setAd(new Ad(AdName.FACEBOOK, AdType.BANNER, "YOUR-FAN-BANNERID"))
-    .build();
-ads.load();
-
-//for AppLovin
-ads = new KafaAds.Builder(context)
-    .setContainer(findViewById(R.id.lyt_banner))
-    .setAd(new Ad(AdName.APPLOVIN, AdType.BANNER, "YOUR-FAN-BANNERID"))
     .build();
 ads.load();
 
