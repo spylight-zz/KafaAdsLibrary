@@ -51,6 +51,9 @@ View Support Ads
   - Interstitial
   - OpenApp Ads
   - Rewards
+- Support Main / Backup Ads
+- Intervals Interstitial
+- Intervals Rewards  
   
 ### Prerequisites
 What things you need to install the software and how to install them, use Jitpack
@@ -71,7 +74,7 @@ Add the dependency
 [![](https://jitpack.io/v/spylight-zz/KafaAdsLibrary.svg)](https://jitpack.io/#spylight-zz/KafaAdsLibrary)
 ```Groove
 dependencies {
-	implementation 'com.github.spylight-zz:KafaAdsLibrary:2.1'
+	implementation 'com.github.spylight-zz:KafaAdsLibrary:2.1.5'
 }
 ```
 
@@ -89,9 +92,13 @@ below this setting json example for ads
 ```json
 {
 	"status":"1",
+	"interval-ads-inters":"2",
+	"interval-ads-rewa":"1",
+	"interval-ads-native":"0",
 	"main-ads":"Admob",
 	"backup-ads":"Applovin",
 	"backup-status":"0",
+	"unity-test-mode":true,
 	"appid":"ca-app-pub-3940256099942544~3347510000",
 	"banner":"ca-app-pub-3940256099942544/6300978111",
 	"inters":"ca-app-pub-3940256099942544/1033173712",
@@ -99,13 +106,14 @@ below this setting json example for ads
 	"native":"ca-app-pub-3940256099942544/2247696110",
 	"openapp":"ca-app-pub-3940256099942544/3419835294",
 	"backup-appid":"<YOUR SDK KEY APPLOVIN OR FB FAN KEY>",
-    	"backup-banner":"<YOUR BANNER ID APPLOVIN OR FB FAN>",
-    	"backup-inters":"<YOUR INTERSTITIAL ID APPLOVIN OR FB FAN>",
-    	"backup-rewa":"<YOUR REWARDS ID APPLOVIN OR FB FAN>",
+    "backup-banner":"<YOUR BANNER ID APPLOVIN OR FB FAN>",
+    "backup-inters":"<YOUR INTERSTITIAL ID APPLOVIN OR FB FAN>",
+    "backup-rewa":"<YOUR REWARDS ID APPLOVIN OR FB FAN>",
 	"backup-native":"<OPTIONAL - STILL ON PROGRESS>",
-    	"backup-openapp":"<YOUR OPENAPP ID APPLOVIN OR FB FAN>",
+    "backup-openapp":"<YOUR OPENAPP ID APPLOVIN OR FB FAN>",
 	"app_suspend":false,
-	"link_app_redirect":"<LINK TO REDIRECT IF APP SUSPEND, APP SUSPEN MUST BE SET TO TRUE>"
+	"link_app_redirect":"<LINK TO REDIRECT IF APP SUSPEND, APP SUSPEN MUST BE SET TO TRUE>",
+	"link-app-privacy":"YOUR LINK PRIVACY APP"
 }
 ```
 and now in your code, you can write like below
