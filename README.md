@@ -174,12 +174,110 @@ ads = new KafaAds.Builder(context)
     .setAd(new Ad(AdName.FACEBOOK, AdType.BANNER, "YOUR-FAN-BANNERID"))
     .build();
 ads.load();
-
-/* Interstitial
-
 ```
+##### Interstitial
+This example to display InterstitialAd
+```java
+/* Interstitial
+ * 
+ */
+//for Admob
+ads = new KafaAds.With(context)
+	.setAd(new Ad(AdName.ADMOB, AdType.INTERSTITIAL, KafaAds.getAds().get_interstitial()))
+	.setOnInterstitialAdLoadListener(new OnInterstitialAdLoadListener() {
+		@Override
+		public void onAdLoaded() {
+			ads.showInterstitial();
+			Log.d("showInter", "iklan inter muncul");
+		}
 
+		@Override
+		public void onAdFailedToLoad() {
 
+		}
+
+		@Override
+		public void onAdClosed() {
+			Log.d("closedInter", "iklan inter closed");
+		}
+	})
+	.build();
+ads.load(); 
+
+//for AppLovin
+ads = new KafaAds.With(context)
+	.setAd(new Ad(AdName.APPLOVIN, AdType.INTERSTITIAL, KafaAds.getAds().get_backup_interstitial()))
+	.setOnMaxInterstitialAdLoadListener(new OnMaxInterstitialAdLoadListener() {
+		@Override
+		public void onAdExpanded() {
+
+		}
+
+		@Override
+		public void onAdCollapsed() {
+
+		}
+
+		@Override
+		public void onAdLoaded() {
+			ads.showMaxInterstitial();
+			Log.d("showInter", "iklan max inter muncul");
+		}
+
+		@Override
+		public void onAdDisplayed() {
+
+		}
+
+		@Override
+		public void onAdHidden() {
+			Log.d("closedInter", "iklan max inter closed");
+		}
+
+		@Override
+		public void onAdClicked() {
+
+		}
+
+		@Override
+		public void onAdFailedToLoad() {
+
+		}
+
+		@Override
+		public void onAdDisplayFailed() {
+
+		}
+	})
+	.build();
+ads.load();
+
+//for UnityAds
+IUnityAdsShowListener showListener;
+showListener = new IUnityAdsShowListener() {
+	@Override
+	public void onUnityAdsShowFailure(String placementId, UnityAdsShowError unityAdsShowError, String message) {
+
+	}
+
+	@Override
+	public void onUnityAdsShowStart(String placementId) {
+		Log.d("showInter", "iklan inter muncul " + placementId);
+	}
+
+	@Override
+	public void onUnityAdsShowClick(String placementId) {
+		Log.d("showInter", "iklan inter klik " + placementId);
+	}
+
+	@Override
+	public void onUnityAdsShowComplete(String placementId) {
+		Log.d("showComplete", "iklan inter complete " + placementId);
+	}
+};
+ads = new KafaAds(context);
+ads.unityShowInterstitial(KafaAds.getAds().get_backup_interstitial(), showListener);
+```
 
 ## Authors
 Made with ❤ by [@spylight-zz](https://www.github.com/spylight-zz)
