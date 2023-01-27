@@ -384,7 +384,7 @@ ads.unityShowReward(KafaAds.getAds().get_backup_reward(), showListener);
 ##### Native
 This example to display NativeAd
 ```java
-/* NativeAdAd
+/* NativeAd
  * 
  */
 //for Admob
@@ -402,7 +402,14 @@ frameLayout.setVisibility(View.VISIBLE);
 ads = new KafaAds(context);
 ads.showMaxNativeTemplate(frameLayout, KafaAds.getAds().get_backup_native()); 
 ``` 
-
+##### OpenApp
+This example to display OpenAppAd
+```java
+/* OpenAppAd
+ * 
+ */
+KafaAds.initOpenAd(this); 
+``` 
 I will continue to develop this library and I will be very happy if anyone wants to help develop this library.
 
 Thank you for using this library.
