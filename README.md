@@ -12,15 +12,19 @@ This library help to you display ads from Admob, AppLovin or FAN, you can use it
 ## Getting Started
 This library support Admob, AppLovin and FAN provider
 - Admob
-  - Admob SDK 21.3.0
+  - Admob SDK 21.4.0
   - Lifecycle-runtime 2.2.0
   - Lifecycle-compiler 2.2.0
   - Lifecycle-Extensions 2.2.0
 - FAN
   - FAN SDK 5.10.1
 - AppLovin
-  - SDK 11.5.3 
+  - SDK 11.6.1 
   - lifecycle-process:2.5.1
+- UnityAds
+  - unity-ads:4.5.0
+- Mediation
+  - AppLovin  
 - Retrofit 2.7.1
 - Gson 2.9.0
 - Glide 4.13.1
@@ -35,8 +39,13 @@ View Support Ads
 - AppLovin
   - Banner
   - Interstitial
+  - Native
   - OpenApp Ads
   - Rewards
+- UnityAds
+  - Banner
+  - Interstitial
+  - Rewards  
 - FAN
   - Banner
   - Interstitial
