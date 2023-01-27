@@ -36,24 +36,6 @@ public class AdManager {
         this.activity = activity;
     }
 
-    public void pleaseSetAppId() {
-        try {
-            ApplicationInfo ai = activity.getPackageManager().getApplicationInfo(activity.getPackageName(), PackageManager.GET_META_DATA);
-            Bundle bundle = ai.metaData;
-            String myApiKey = bundle.getString("com.google.android.gms.ads.APPLICATION_ID");
-            Log.d(AdManager.class.getSimpleName(), "Name Found: " + myApiKey);
-            ai.metaData.putString("com.google.android.gms.ads.APPLICATION_ID", KafaAds.getAds().get_appid());//you can replace your key APPLICATION_ID here
-            String ApiKey = bundle.getString("com.google.android.gms.ads.APPLICATION_ID");
-
-            //Application.newInitializeAdMob((Application) getApplication());
-            Log.d(AdManager.class.getSimpleName(), "ReNamed Found: " + ApiKey);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(AdManager.class.getSimpleName(), "Failed to load meta-data, NameNotFound: " + e.getMessage());
-        } catch (NullPointerException e) {
-            Log.e(AdManager.class.getSimpleName(), "Failed to load meta-data, NullPointer: " + e.getMessage());
-        }
-    }
-
     public void showBanner(boolean... halfBanner) {
         if (KafaAds.getAds().get_status().equalsIgnoreCase("1")) {
             if (KafaAds.getAds().get_backup_status().equalsIgnoreCase("1")) {
