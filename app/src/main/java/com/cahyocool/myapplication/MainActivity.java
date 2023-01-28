@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPostExecute() {
-                new AdManager(MainActivity.this).pleaseSetAppId();
                 KafaAds.initAd(MainActivity.this);
                 new AdManager(MainActivity.this).showBanner();
                 new AdManager(MainActivity.this).showNative();
